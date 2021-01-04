@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum CsvReaderColumnAdjustment {
+public enum CsvReaderColumnAdjustment {
     case ignore
     case remove
     case adjust

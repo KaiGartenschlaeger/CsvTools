@@ -14,7 +14,7 @@ public class CsvReader {
     var hasHeader: Bool = true
     var adjustColumns: CsvReaderColumnAdjustment = .ignore
 
-    init(_ text: String) {
+    public init(_ text: String) {
         self.text = text
     }
 
@@ -72,7 +72,7 @@ public class CsvReader {
         return fieldText[startIndex..<endIndex]
     }
 
-    func parse() -> CsvReaderDataSet {
+    public func parse() -> CsvReaderDataSet {
         var headerColumns: [String]?
         var rows: [[String]] = []
         var isFirstRow = true

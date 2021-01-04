@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct CsvReaderDataSet {
+public struct CsvReaderDataSet {
     let columns: [String]?
     let rows: [[String]]
 }
