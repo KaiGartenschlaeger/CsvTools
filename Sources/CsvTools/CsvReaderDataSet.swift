@@ -8,6 +8,9 @@
 import Foundation
 
 public struct CsvReaderDataSet {
-    let columns: [String]?
-    let rows: [[String]]
+
+    public let columns: [String]?
+
+    public let rows: [[String]]
+
 }

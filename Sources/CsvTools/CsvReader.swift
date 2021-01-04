@@ -11,8 +11,9 @@ public class CsvReader {
 
     private let text: String
 
-    var hasHeader: Bool = true
-    var adjustColumns: CsvReaderColumnAdjustment = .ignore
+    public var hasHeader: Bool = true
+
+    public var adjustColumns: CsvReaderColumnAdjustment = .ignore
 
     public init(_ text: String) {
         self.text = text
