@@ -12,6 +12,7 @@ public class CsvReader {
     private let text: String
 
     public var hasHeader: Bool = true
+    public var trimFields: Bool = false
     public var adjustColumns: CsvReaderColumnAdjustment = .ignore
 
     public init(_ text: String) {
@@ -66,9 +67,14 @@ public class CsvReader {
     }
 
     private func createFieldString(fieldText: Substring) -> String {
-        let text = String(fieldText)
+        var text = String(fieldText)
+        text = text.replacingOccurrences(of: "\"\"", with: "\"")
+
+        if self.trimFields {
+            text = text.trimmingCharacters(in: .whitespaces)
+        }
+
         return text
-            .replacingOccurrences(of: "\"\"", with: "\"")
     }
 
     public func parse() -> CsvReaderDataSet {
