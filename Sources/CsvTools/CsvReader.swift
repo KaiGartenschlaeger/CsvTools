@@ -12,148 +12,97 @@ public class CsvReader {
     private let text: String
 
     public var hasHeader: Bool = true
-
     public var adjustColumns: CsvReaderColumnAdjustment = .ignore
 
     public init(_ text: String) {
         self.text = text
     }
 
-    private func isDoubleQuote(text: Substring, index: String.Index) -> Bool {
-        if index >= text.endIndex {
-            return false
-        }
+    private func moveToEndOfField(iterator: StringIterator, isQuoted: Bool) {
+        while iterator.next() {
+            //print("moveToEndOfField() isQuoted = \(isQuoted), currentChar = \(iterator.currentChar as Any), nextChar = \(iterator.nextChar as Any)")
 
-        let firstIndex = index
-        let nextIndex = text.index(after: firstIndex)
-        if text[firstIndex] == "\"" {
-            if nextIndex < text.endIndex && text[nextIndex] != "\"" {
-                return true
+            if isQuoted {
+                if iterator.currentChar == Characters.doubleQuote {
+                    if iterator.nextChar != Characters.doubleQuote {
+                        break
+                    }
+                    else {
+                        let _ = iterator.next()
+                    }
+                }
+            }
+            else {
+                if iterator.currentChar == Characters.comma {
+                    break
+                }
             }
         }
-
-        return false
     }
 
-    private func findEndIndex(text: Substring) -> String.Index? {
-        return text.firstIndex(of: "\"")
+    private func readField(from iterator: StringIterator) -> String? {
+        if iterator.isEndOfString {
+            return nil
+        }
+
+        let isQuotedField = iterator.currentChar == Characters.doubleQuote && iterator.nextChar != Characters.doubleQuote
+        if isQuotedField {
+            let _ = iterator.next()
+        }
+
+        iterator.setBreakpoint()
+
+        moveToEndOfField(iterator: iterator, isQuoted: isQuotedField)
+        let fieldText = createFieldString(fieldText: iterator.leftText)
+
+        //print("readField() fieldText = '\(fieldText)', currentChar = \(iterator.currentChar as Any), nextChat = \(iterator.nextChar as Any)")
+
+        // skip closing double quote
+        if isQuotedField && iterator.currentChar == Characters.doubleQuote {
+            let _ = iterator.next()
+        }
+
+        return fieldText
     }
 
-    private func parseField(fieldText: Substring) -> Substring {
-        var startIndex: String.Index = fieldText.startIndex
-        var endIndex: String.Index
-
-        //print("[parseField], startCharacter = '\(fieldText[fieldText.startIndex])', count = \(fieldText.count)")
-
-        // skip "," at start
-        if fieldText[startIndex] == "," {
-            startIndex = fieldText.index(after: startIndex)
-        }
-
-        //print("[parseField], startCharacter = '\(fieldText[startIndex])', startIndex = \(fieldText.distance(from: fieldText.startIndex, to: startIndex))")
-
-        let hasDoubleQuotes = isDoubleQuote(text: fieldText, index: startIndex)
-        if hasDoubleQuotes {
-            startIndex = fieldText.index(after: startIndex)
-
-            let left = fieldText[startIndex..<fieldText.endIndex]
-            if let index = findEndIndex(text: left) {
-                endIndex = index
-            } else {
-                endIndex = fieldText.endIndex
-            }
-        } else {
-            if let index = fieldText[startIndex..<fieldText.endIndex].firstIndex(of: ",") {
-                endIndex = index
-            } else {
-                endIndex = fieldText.endIndex
-            }
-        }
-
-        return fieldText[startIndex..<endIndex]
+    private func createFieldString(fieldText: Substring) -> String {
+        let text = String(fieldText)
+        return text
+            .replacingOccurrences(of: "\"\"", with: "\"")
     }
 
     public func parse() -> CsvReaderDataSet {
         var headerColumns: [String]?
         var rows: [[String]] = []
+
         var isFirstRow = true
-
         self.text.enumerateLines { (line, stop) in
-            var columns: [String] = []
-            var substring = Substring(line)
+            //print("parse() line = \(line)")
 
-            //print()
-            //print("[parse] line = '\(substring)'")
+            var currentRow: [String] = []
 
-            while (true) {
-                let field = self.parseField(fieldText: substring)
+            let iterator = StringIterator(text: line)
+            while let field = self.readField(from: iterator) {
+                //print("parse() field = '\(field)'")
+                currentRow.append(field)
 
-                //print("[parse] fieldRange = \(line.distance(from: line.startIndex, to: field.startIndex)) - \(line.distance(from: line.startIndex, to: field.endIndex))")
-                //print("[parse] fieldText = '\(field)'")
+                // skip comma after field
+                if iterator.currentChar == Characters.comma {
+                    let _ = iterator.next()
 
-                columns.append(String(field).replacingOccurrences(of: "\"\"", with: "\""))
-
-                let leftCount = line.count - line.distance(from: line.startIndex, to: field.endIndex)
-                //print("[parse] leftCount = \(leftCount)")
-
-                if field.endIndex >= line.endIndex || leftCount == 0 {
-                    break
-                }
-                else if leftCount == 1 && line[field.endIndex] == "," {
-                    columns.append("")
-                    break
-                }
-                else if leftCount == 1 && line[field.endIndex] == "\"" {
-                    columns.append("")
-                    break
-                }
-                else {
-                    substring = line[line.index(after: field.endIndex)..<line.endIndex];
+                    if iterator.isEndOfString {
+                        // add last empty field
+                        currentRow.append("")
+                    }
                 }
             }
 
-            if isFirstRow {
-                // header row
-                if self.hasHeader {
-                    headerColumns = columns
-                }
-                else {
-                    rows.append(columns)
-                }
-
+            if self.hasHeader && isFirstRow {
                 isFirstRow = false
-            } else {
-                // data row
-                if self.hasHeader && self.adjustColumns != .ignore {
-                    switch self.adjustColumns {
-                    case .adjust:
-                        if columns.count == headerColumns?.count {
-                            rows.append(columns)
-                        } else {
-                            if let headerColumnsCount = headerColumns?.count {
-                                while columns.count < headerColumnsCount {
-                                    columns.append("")
-                                }
-                                while columns.count > headerColumnsCount {
-                                    columns.removeLast()
-                                }
-                            }
-
-                            rows.append(columns)
-                        }
-                        break
-
-                    case .remove:
-                        if columns.count == headerColumns?.count {
-                            rows.append(columns)
-                        }
-
-                    case .ignore:
-                        break
-                    }
-                } else {
-                    rows.append(columns)
-                }
+                headerColumns = currentRow
+            }
+            else {
+                rows.append(currentRow)
             }
         }
 

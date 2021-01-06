@@ -48,9 +48,11 @@ final class CsvToolsTests: XCTestCase {
         let result = reader.parse()
 
         XCTAssertNotNil(result.columns)
+
         XCTAssertEqual(2, result.columns?.count)
-        XCTAssertEqual(result.columns![0], "Spalte 1")
-        XCTAssertEqual(result.columns![1], "Spalte 2")
+
+        XCTAssertEqual(result.columns?[0], "Spalte 1")
+        XCTAssertEqual(result.columns?[1], "Spalte 2")
 
         XCTAssertEqual(3, result.rows.count)
 
@@ -158,16 +160,16 @@ final class CsvToolsTests: XCTestCase {
     }
 
     func testFix1() {
-        let text = "Spalte1,"
+        let text = "Spalte 1,"
 
         let reader = CsvReader(text)
         let result = reader.parse()
 
-        XCTAssertNil(result.columns)
+        XCTAssertNotNil(result.columns)
+        XCTAssertEqual(result.columns?[0], "Spalte 1")
+        XCTAssertEqual(result.columns?[1], "")
 
-        XCTAssertEqual(result.rows.count, 1)
-        XCTAssertEqual(result.rows[0][0], "Spalte1")
-        XCTAssertEqual(result.rows[0][1], "")
+        XCTAssertEqual(result.rows.count, 0)
     }
 
     func testInvalidComma() {
