@@ -187,4 +187,19 @@ final class CsvToolsTests: XCTestCase {
         XCTAssertEqual(result.rows[0][1], "Zelle C")
     }
 
+    func testEmptyLine() {
+        let text =
+        """
+        Spalte 1,Spalte 2
+        Zelle 1.1,Zelle 2.1
+
+        Zelle 2.1,Zelle 2.2
+        """
+
+        let reader = CsvReader(text)
+        let result = reader.parse()
+
+        XCTAssertEqual(result.rows.count, 2)
+    }
+
 }
