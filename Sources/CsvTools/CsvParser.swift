@@ -22,7 +22,7 @@ public class CsvParser {
         var columns: [String]? = nil
         var rows: [[String]] = []
         var fields: [String] = []
-        var isFirstRow: Bool = false
+        var isFirstRow: Bool = true
 
         let state = CsvParserState()
 
@@ -38,7 +38,7 @@ public class CsvParser {
         }
 
         state.onNewRow = {
-            print("[CsvParser] parse() -> onNewRow()")
+            print("[CsvParser] parse() -> onNewRow(), isFirstRow = \(isFirstRow)")
 
             if isFirstRow && self.hasHeader {
                 isFirstRow = false

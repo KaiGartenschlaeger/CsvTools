@@ -36,6 +36,31 @@ final class CsvParserTests: XCTestCase {
         XCTAssertEqual(result.getValue(forRow: 1, withFieldIndex: 1), "Field 2.2")
     }
 
+    func testHeader() {
+        let text = """
+        Number A,Number B,Sum
+        1,1,2
+        1,2,3
+        2,3,5
+        3,5,8
+        """
+
+        let parser = CsvParser(text: text)
+        parser.hasHeader = true
+
+        let result = parser.parse()
+
+        XCTAssertTrue(result.hasHeader)
+        XCTAssertEqual(result.getValue(forColumn: 0), "Number A")
+        XCTAssertEqual(result.getValue(forColumn: 1), "Number B")
+        XCTAssertEqual(result.getValue(forColumn: 2), "Sum")
+
+        XCTAssertEqual(result.rowsCount, 4)
+        XCTAssertEqual(result.getValue(forRow: 0, withFieldIndex: 0), "1")
+        XCTAssertEqual(result.getValue(forRow: 0, withFieldIndex: 1), "1")
+        XCTAssertEqual(result.getValue(forRow: 0, withFieldIndex: 2), "2")
+    }
+
     func testCommaOnly1Time() {
         let parser = CsvParser(text: ",")
         parser.hasHeader = false

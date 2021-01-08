@@ -37,6 +37,14 @@ public class CsvDataSet {
         return self.columns != nil
     }
 
+    public func getValue(forColumn column: Int) -> String? {
+        if self.columns != nil && self.columnsCount > column {
+            return self.columns![column]
+        }
+
+        return nil
+    }
+
     public func getValue(forRow row: Int, withFieldIndex field: Int) -> String? {
         if self.rows.count > row && self.rows[row].count > field {
             return self.rows[row][field]
