@@ -8,6 +8,8 @@
 import Foundation
 
 class Characters {
+
     static let doubleQuote: Character = "\""
     static let comma: Character = ","
+
 }
