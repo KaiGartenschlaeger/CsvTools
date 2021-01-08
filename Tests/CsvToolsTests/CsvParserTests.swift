@@ -153,4 +153,20 @@ final class CsvParserTests: XCTestCase {
         XCTAssertEqual(result.getValue(forRow: 0, withFieldIndex: 1), "Feld\"2")
     }
 
+    func testDoubleQuoteAtStartEnd() {
+        let text = """
+        ""Feld 1"",""Feld 2""
+        """
+
+        let parser = CsvParser(text: text)
+        parser.hasHeader = false
+
+        let result = parser.parse()
+
+        XCTAssertFalse(result.hasHeader)
+        XCTAssertEqual(result.rowsCount, 1)
+        XCTAssertEqual(result.getValue(forRow: 0, withFieldIndex: 0), "\"Feld 1\"")
+        XCTAssertEqual(result.getValue(forRow: 0, withFieldIndex: 1), "\"Feld 2\"")
+    }
+
 }
