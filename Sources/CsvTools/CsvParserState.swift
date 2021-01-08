@@ -77,7 +77,11 @@ public class CsvParserState {
                 self.currentState = .fieldText
             }
             else if char == Characters.comma {
-                fieldFinished()
+                self.fieldFinished()
+            }
+            else if char.isNewline {
+                self.fieldFinished()
+                self.onNewRow?()
             }
             else {
                 self.isQuoted = true
