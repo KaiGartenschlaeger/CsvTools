@@ -61,7 +61,7 @@ public class CsvParserState {
             if char == Characters.comma && !self.isQuoted {
                 self.fieldFinished()
             }
-            else if char == Characters.doubleQuote && self.isQuoted {
+            else if char == Characters.doubleQuote {
                 self.currentState = .quoteStarted
             }
             else if char.isNewline {
@@ -74,6 +74,7 @@ public class CsvParserState {
 
         case .quoteStarted:
             if char == Characters.doubleQuote {
+                self.fieldText.append(char)
                 self.currentState = .fieldText
             }
             else if char == Characters.comma {
