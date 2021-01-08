@@ -48,6 +48,10 @@ public class CsvParserState {
             else if char == Characters.comma {
                 self.fieldFinished()
             }
+            else if char.isNewline {
+                self.fieldFinished()
+                self.onNewRow?()
+            }
             else {
                 self.currentState = .fieldText
                 self.fieldText.append(char)
