@@ -9,20 +9,28 @@ import Foundation
 
 public class CsvDataSet {
 
-    private let columns: [String]?
-    private let rows: [[String]]
+    public let columns: [String]?
+    public let columnsCount: Int
+    public let rows: [[String]]
+    public let rowsCount: Int
 
     public init(columns: [String]?, rows: [[String]]) {
         self.columns = columns
         self.rows = rows
-    }
 
-    public var rowsCount: Int {
-        return self.rows.count
-    }
+        if let columns = columns {
+            self.columnsCount = columns.count
+        }
+        else {
+            var maxColumnsCount = 0
+            for row in rows {
+                maxColumnsCount = max(maxColumnsCount, row.count)
+            }
 
-    public var columnsCount: Int {
-        return self.columns?.count ?? 0
+            self.columnsCount = maxColumnsCount
+        }
+
+        self.rowsCount = rows.count
     }
 
     public var hasHeader: Bool {

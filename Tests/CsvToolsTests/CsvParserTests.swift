@@ -36,7 +36,20 @@ final class CsvParserTests: XCTestCase {
         XCTAssertEqual(result.getValue(forRow: 1, withFieldIndex: 1), "Field 2.2")
     }
 
-    func testEmptyFields() {
+    func testCommaOnly1Time() {
+        let parser = CsvParser(text: ",")
+        parser.hasHeader = false
+
+        let result = parser.parse()
+
+        XCTAssertFalse(result.hasHeader)
+        XCTAssertEqual(result.rowsCount, 1)
+        XCTAssertEqual(2, result.columnsCount)
+        XCTAssertEqual(result.getValue(forRow: 0, withFieldIndex: 0), "")
+        XCTAssertEqual(result.getValue(forRow: 0, withFieldIndex: 1), "")
+    }
+
+    func testCommaOnly2Times() {
         let parser = CsvParser(text: ",,")
         parser.hasHeader = false
 
@@ -44,9 +57,26 @@ final class CsvParserTests: XCTestCase {
 
         XCTAssertFalse(result.hasHeader)
         XCTAssertEqual(result.rowsCount, 1)
+        XCTAssertEqual(3, result.columnsCount)
         XCTAssertEqual(result.getValue(forRow: 0, withFieldIndex: 0), "")
         XCTAssertEqual(result.getValue(forRow: 0, withFieldIndex: 1), "")
         XCTAssertEqual(result.getValue(forRow: 0, withFieldIndex: 2), "")
+    }
+
+    func testCommaOnlyWithLineBreak() {
+        let parser = CsvParser(text: ",,\n,")
+        parser.hasHeader = false
+
+        let result = parser.parse()
+
+        XCTAssertFalse(result.hasHeader)
+        XCTAssertEqual(result.rowsCount, 2)
+        XCTAssertEqual(3, result.columnsCount)
+        XCTAssertEqual(result.getValue(forRow: 0, withFieldIndex: 0), "")
+        XCTAssertEqual(result.getValue(forRow: 0, withFieldIndex: 1), "")
+        XCTAssertEqual(result.getValue(forRow: 0, withFieldIndex: 2), "")
+        XCTAssertEqual(result.getValue(forRow: 1, withFieldIndex: 0), "")
+        XCTAssertEqual(result.getValue(forRow: 1, withFieldIndex: 1), "")
     }
 
     func testEmptyFieldAtStart() {
